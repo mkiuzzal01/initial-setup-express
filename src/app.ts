@@ -1,12 +1,23 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import router from './app/router';
 
 const app = express();
 app.use(express.json());
+app.use(cors({ origin: ['localhost:5173'] }));
 app.use(express.text());
 
 app.get('/', (req, res) => {
-  res.send('Hello Health Track');
+  res.send('Welcome to Health Track');
 });
 
+// All application routes:
+app.use('/api/v1/', router);
 
-export default app
+// This is  just test:
+app.get('/', (req: Request, res: Response) => {
+  Promise.reject();
+  res.send(req);
+});
+
+export default app;

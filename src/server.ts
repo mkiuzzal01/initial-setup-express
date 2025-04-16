@@ -1,18 +1,34 @@
-import app from "./app";
-import { Server } from "http";
-import mongoose from "mongoose";
-import config from "./app/config";
+import { Server } from 'node:http';
+import app from './app';
+import config from './app/config';
+import mongoose from 'mongoose';
 
-const port = process.env.PORT || 3000;
 let server: Server;
-
 async function main() {
-  await mongoose.connect(config.port as string);
-}
-async function bootStrap() {
-  server = app.listen(config.port, () => {
-    console.log(`Server is running at http://localhost:${config.port}`);
-  });
+  try {
+    server = app.listen(config.port, () => {
+      console.log(`Example app listening on port ${config.port}`);
+    });
+    await mongoose.connect(config.database_url as string);
+  } catch (error) {
+    console.log('this error from server:', error);
+  }
 }
 
-bootStrap();
+main();
+
+// handleError:
+process.on('unhandledRejection', () => {
+  console.log('UnhandledPromiseRejection is deprecated,shutting down....');
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+  process.exit(1);
+});
+
+process.on('uncaughtException', () => {
+  console.log('Uncaught Exception, shutting down....');
+  process.exit(1);
+});
