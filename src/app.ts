@@ -1,5 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import globalErrorHandler from './app/middlewares/globalErrorHandler';
+import notFound from './app/utils/NotFound';
 // import router from './app/router';
 
 const app = express();
@@ -9,16 +11,19 @@ app.use(express.text());
 
 // Home route:
 app.get('/', (req: Request, res: Response) => {
-  res.send('Welcome to Health Track');
+  res.send('Welcome to e-commerce app');
 });
 
 // All application routes:
 // app.use('/api/v1/', router);
 
-// This is  just test:
-app.get('/', (req: Request, res: Response) => {
+// This is just test:
+app.get('/test', (req: Request, res: Response) => {
   Promise.reject();
   res.send(req);
 });
+
+app.use(globalErrorHandler);
+app.use(notFound);
 
 export default app;
