@@ -2,15 +2,16 @@ import status from 'http-status';
 import AppError from '../../errors/AppError';
 import { TUser } from '../user/user.interface';
 import { User } from '../user/user.model';
-import { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import { TChangePassword, TResetPassword } from './auth.interface';
 import bcrypt from 'bcrypt';
+import { sendMail } from '../../utils/sendMail';
 import { createToken, verifyToken } from './auth.utils';
-import { sendMail } from '../../../utils/sendMail';
 
 const loginUser = async (payload: TUser) => {
-  const isUserExist = await User.isUserExistByCustomId(payload?.id);
+  const isUserExist = await User.findOne({
+    email: payload?.email,
+  });
   if (!isUserExist) {
     throw new AppError(status.NOT_FOUND, 'User not found');
   }
@@ -36,22 +37,22 @@ const loginUser = async (payload: TUser) => {
 
   //generate access token:
   const jwtPayload = {
-    userId: isUserExist?.id,
+    email: isUserExist?.email,
     role: isUserExist?.role,
   };
 
   //generate access token:
   const accessToken = createToken(
     jwtPayload,
-    config.access_token_secret as string,
-    config.jwt_access_token_expiration as string,
+    config.jwt_secret as string,
+    config.jwt_expiration as string,
   );
 
   //generate refresh token:
   const refreshToken = createToken(
     jwtPayload,
-    config.refresh_token_secret as string,
-    config.jwt_refresh_token_expiration as string,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expiration as string,
   );
 
   //then finally login  user:
@@ -62,12 +63,19 @@ const loginUser = async (payload: TUser) => {
   };
 };
 
-const changePassword = async (
-  payload: JwtPayload,
-  userPass: TChangePassword,
-) => {
-  const { role, userId } = payload;
-  const isUserExist = await User.isUserExistByCustomId(userId);
+const registerUser = async (payload: TUser) => {
+  const isUserExist = await User.findOne({
+    email: payload?.email,
+  });
+  if (isUserExist) {
+    throw new AppError(status.CONFLICT, 'User already exists');
+  }
+  const result = await User.create(payload);
+  return result;
+};
+
+const changePassword = async (payload: TUser, userPass: TChangePassword) => {
+  const isUserExist = await User.findOne({ email: payload?.email });
 
   if (!isUserExist) {
     throw new AppError(status.NOT_FOUND, 'User not found');
@@ -101,8 +109,7 @@ const changePassword = async (
 
   await User.findOneAndUpdate(
     {
-      id: userId,
-      role: role,
+      email: payload?.email,
     },
     {
       password: newHasPassword,
@@ -120,12 +127,14 @@ const refreshToken = async (token: string) => {
   }
 
   //verified token with decode:
-  const decoded = verifyToken(token, config.refresh_token_secret as string);
+  const decoded = verifyToken(token, config.jwt_refresh_secret as string);
 
   //verification of role and authorization:
-  const { userId, iat } = decoded;
+  const { email, iat } = decoded;
 
-  const isUserExist = await User.isUserExistByCustomId(userId);
+  const isUserExist = await User.findOne({
+    email: email,
+  });
 
   if (!isUserExist) {
     throw new AppError(status.NOT_FOUND, 'user not found');
@@ -159,8 +168,8 @@ const refreshToken = async (token: string) => {
 
   const accessToken = createToken(
     jwtPayload,
-    config.access_token_secret as string,
-    config.jwt_access_token_expiration as string,
+    config.jwt_secret as string,
+    config.jwt_refresh_expiration as string,
   );
 
   return {
@@ -168,8 +177,10 @@ const refreshToken = async (token: string) => {
   };
 };
 
-const forgetPassword = async (id: string) => {
-  const isUserExist = await User.isUserExistByCustomId(id);
+const forgetPassword = async (email: string) => {
+  const isUserExist = await User.findOne({
+    email,
+  });
 
   if (!isUserExist) {
     throw new AppError(status.NOT_FOUND, 'user not found');
@@ -187,24 +198,24 @@ const forgetPassword = async (id: string) => {
 
   //generate access token:
   const jwtPayload = {
-    userId: isUserExist?.id,
+    email: isUserExist?.email,
     role: isUserExist?.role,
   };
 
   //generate access token:
   const resetToken = createToken(
     jwtPayload,
-    config.access_token_secret as string,
-    config.jwt_access_token_expiration as string,
+    config.jwt_secret as string,
+    config.jwt_expiration as string,
   );
 
-  const resetLink = `${config.reset_pass_ui_link}?id=${id}&token=${resetToken}`;
+  const resetLink = `${config.reset_pass_ui_link}?id=${email}&token=${resetToken}`;
 
   sendMail(isUserExist.email, resetLink);
 };
 
 const resetPassword = async (payload: TResetPassword, token: string) => {
-  const isUserExist = await User.isUserExistByCustomId(payload.id);
+  const isUserExist = await User.findOne({ email: payload.email });
   if (!isUserExist) {
     throw new AppError(status.NOT_FOUND, 'user not found');
   }
@@ -224,9 +235,9 @@ const resetPassword = async (payload: TResetPassword, token: string) => {
   }
 
   //verified token with decode:
-  const decoded = verifyToken(token, config.access_token_secret as string);
+  const decoded = verifyToken(token, config.jwt_secret as string);
 
-  if (payload.id !== decoded.userId) {
+  if (payload.email !== decoded.email) {
     throw new AppError(status.FORBIDDEN, 'you are forbidden');
   }
 
@@ -238,7 +249,7 @@ const resetPassword = async (payload: TResetPassword, token: string) => {
 
   await User.findOneAndUpdate(
     {
-      id: decoded.userId,
+      email: decoded.email,
       role: decoded.role,
     },
     {
@@ -253,6 +264,7 @@ const resetPassword = async (payload: TResetPassword, token: string) => {
 
 export const AuthService = {
   loginUser,
+  registerUser,
   changePassword,
   refreshToken,
   forgetPassword,

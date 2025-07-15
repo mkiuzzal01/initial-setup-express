@@ -3,11 +3,8 @@ import { USER_STATUS } from './user.constant';
 
 export const userValidationSchema = z.object({
   password: z
-    .string({
-      required_error: 'Password is required',
-    })
-    .max(20, { message: 'Password must be at least 20 characters' })
-    .optional(),
+    .string({})
+    .max(20, { message: 'Password must be at least 20 characters' }),
 });
 
 export const changeStatusValidationSchema = z.object({

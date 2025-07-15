@@ -6,17 +6,28 @@ import { USER_STATUS } from './user.constant';
 
 const userSchema = new Schema<TUser, userModel>(
   {
-    id: { type: String, unique: true, required: true },
+    name: {
+      firstName: { type: String, required: true },
+      middleName: { type: String },
+      lastName: { type: String, required: true },
+    },
+    slug: { type: String, unique: true },
+    phone: { type: String, unique: true },
+    address: {
+      presentAddress: { type: String, required: true },
+      permanentAddress: { type: String, required: true },
+    },
+    gender: { type: String, required: true },
     email: { type: String, unique: true, required: true },
-    password: { type: String, required: true, select: 0 },
+    password: { type: String, required: true },
     needsPasswordChange: { type: Boolean, default: true },
     passwordChangeAt: {
       type: Date,
     },
     role: {
       type: String,
-      enum: ['superAdmin', 'admin', 'student', 'faculty'],
-      required: true,
+      enum: ['superAdmin', 'admin', 'user'],
+      default: 'user',
     },
     status: {
       type: String,
@@ -46,11 +57,6 @@ userSchema.post('save', function (doc, next) {
   next();
 });
 
-//check user is exist:
-userSchema.statics.isUserExistByCustomId = async function (id: string) {
-  return await User.findOne({ id }).select('+password');
-};
-
 //check password is match:
 userSchema.statics.isPasswordMatch = async function (
   plaintextPassword,
@@ -58,6 +64,35 @@ userSchema.statics.isPasswordMatch = async function (
 ) {
   return await bcrypt.compare(plaintextPassword, hashedPassword);
 };
+
+//for create user slug:
+userSchema.pre('save', function (next) {
+  if (this.isModified('name')) {
+    this.slug =
+      `${this.name?.firstName}-${this.name?.lastName}-${this.name?.middleName}-${this.email}`
+        .toLowerCase()
+        .replace(/ /g, '-');
+  }
+  next();
+});
+
+//for update user slug:
+userSchema.pre('findOneAndUpdate', function (next) {
+  const update = this.getUpdate();
+  if (
+    update &&
+    typeof update === 'object' &&
+    !Array.isArray(update) &&
+    'name' in update
+  ) {
+    (update as Record<string, unknown>).slug =
+      `${update.name?.firstName}-${update.name?.lastName}-${update.name?.middleName}-${update.email}`
+        .toLowerCase()
+        .replace(/ /g, '-');
+    this.setUpdate(update);
+  }
+  next();
+});
 
 //check password change time and jwt token issue time:
 userSchema.statics.isJwtIssuedBeforePasswordChange = async function (

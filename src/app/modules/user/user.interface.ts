@@ -1,14 +1,33 @@
 import { Model } from 'mongoose';
-import { USER_ROLE } from './user.constant';
+import { TGender, USER_ROLE } from './user.constant';
+
+export type TUserStatus = 'in-progress' | 'blocked';
+export type TUserRole = keyof typeof USER_ROLE;
+
+export type TName = {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+};
+
+export type TLocation = {
+  presentAddress: string;
+  permanentAddress: string;
+};
 
 export interface TUser {
-  id: string;
+  name: TName;
+  slug?: string;
   email: string;
+  phone?: string;
+  address?: TLocation;
+  gender: TGender;
   password: string;
+  image?: string;
   needsPasswordChange: boolean;
   passwordChangeAt?: Date;
-  role: 'superAdmin' | 'admin' | 'user';
-  status: 'in-progress' | 'blocked';
+  role: TUserRole;
+  status: TUserStatus;
   isDeleted: boolean;
 }
 
@@ -23,5 +42,3 @@ export interface userModel extends Model<TUser> {
     tokenIssuedTime: number,
   ): Promise<boolean>;
 }
-
-export type TUserRole = keyof typeof USER_ROLE;

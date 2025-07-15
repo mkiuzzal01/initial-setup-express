@@ -5,3 +5,5 @@ export const USER_ROLE = {
 } as const;
 
 export const USER_STATUS = ['in-progress', 'blocked'];
+
+export type TGender = 'male' | 'female' | 'other';

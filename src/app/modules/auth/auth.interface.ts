@@ -1,5 +1,5 @@
 export type TAuth = {
-  id: string;
+  email: string;
   password: string;
 };
 
@@ -9,6 +9,6 @@ export type TChangePassword = {
 };
 
 export type TResetPassword = {
-  id: string;
+  email: string;
   newPassword: string;
 };
