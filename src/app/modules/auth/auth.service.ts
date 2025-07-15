@@ -35,7 +35,7 @@ const loginUser = async (payload: TUser) => {
     throw new AppError(status.UNAUTHORIZED, 'Invalid credentials');
   }
 
-  //generate access token:
+  // generate access token:
   const jwtPayload = {
     email: isUserExist?.email,
     role: isUserExist?.role,
