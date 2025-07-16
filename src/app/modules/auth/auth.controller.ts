@@ -85,8 +85,8 @@ const resetPassword: RequestHandler = catchAsync(async (req, res) => {
 export const authController = {
   login,
   register,
-  changePassword,
   refreshToken,
+  changePassword,
   forgetPassword,
   resetPassword,
 };

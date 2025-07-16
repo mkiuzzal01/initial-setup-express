@@ -15,7 +15,7 @@ export type TLocation = {
   permanentAddress: string;
 };
 
-export interface TUser {
+export interface IUser {
   name: TName;
   slug?: string;
   email: string;
@@ -30,7 +30,7 @@ export interface TUser {
   isDeleted: boolean;
 }
 
-export interface userModel extends Model<TUser> {
+export interface userModel extends Model<IUser> {
   isPasswordMatch(
     plaintextPassword: string,
     hashedPassword: string,

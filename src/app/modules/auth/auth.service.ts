@@ -1,6 +1,6 @@
 import status from 'http-status';
 import AppError from '../../errors/AppError';
-import { TUser } from '../user/user.interface';
+import { IUser } from '../user/user.interface';
 import { User } from '../user/user.model';
 import config from '../../config';
 import { TChangePassword, TResetPassword } from './auth.interface';
@@ -8,7 +8,7 @@ import bcrypt from 'bcrypt';
 import { sendMail } from '../../utils/sendMail';
 import { createToken, verifyToken } from './auth.utils';
 
-const loginUser = async (payload: TUser) => {
+const loginUser = async (payload: IUser) => {
   const isUserExist = await User.findOne({
     email: payload?.email,
   });
@@ -63,7 +63,7 @@ const loginUser = async (payload: TUser) => {
   };
 };
 
-const registerUser = async (payload: TUser) => {
+const registerUser = async (payload: IUser) => {
   const isUserExist = await User.findOne({
     email: payload?.email,
   });
@@ -130,7 +130,7 @@ const refreshToken = async (token: string) => {
   };
 };
 
-const changePassword = async (payload: TUser, userPass: TChangePassword) => {
+const changePassword = async (payload: IUser, userPass: TChangePassword) => {
   const isUserExist = await User.findOne({ email: payload?.email });
 
   if (!isUserExist) {

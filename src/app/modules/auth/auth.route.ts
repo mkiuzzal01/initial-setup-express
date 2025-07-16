@@ -3,6 +3,8 @@ import { authController } from './auth.controller';
 import validationRequest from '../../middlewares/validationRequest';
 import { userValidation } from '../user/user.validation';
 import { authValidation } from './auth.validation';
+import { auth } from '../../middlewares/auth';
+import { USER_ROLE } from '../user/user.constant';
 
 const route = Router();
 
@@ -23,6 +25,7 @@ route.post(
 );
 route.post(
   '/change-password',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
   validationRequest(authValidation.changePasswordValidationSchema),
   authController.changePassword,
 );
