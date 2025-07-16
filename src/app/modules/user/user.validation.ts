@@ -14,14 +14,16 @@ const locationSchema = z.object({
 });
 
 const userValidationSchema = z.object({
-  name: nameSchema,
-  slug: z.string().optional(),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().optional(),
-  address: locationSchema.optional(),
-  gender: z.enum(GENDERS),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  image: z.string().url('Image must be a valid URL').optional(),
+  body: z.object({
+    name: nameSchema,
+    slug: z.string().optional(),
+    email: z.string().email('Invalid email address'),
+    phone: z.string().optional(),
+    address: locationSchema.optional(),
+    gender: z.enum(GENDERS),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    image: z.string().url('Image must be a valid URL').optional(),
+  }),
 });
 
 const updateUserValidationSchema = userValidationSchema.partial();

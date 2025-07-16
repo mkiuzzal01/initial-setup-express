@@ -1,10 +1,10 @@
 import { model, Schema } from 'mongoose';
-import { TUser, userModel } from './user.interface';
+import { IUser, userModel } from './user.interface';
 import bcrypt from 'bcrypt';
 import config from '../../config';
 import { USER_STATUS } from './user.constant';
 
-const userSchema = new Schema<TUser, userModel>(
+const userSchema = new Schema<IUser, userModel>(
   {
     name: {
       firstName: { type: String, required: true },
@@ -102,4 +102,4 @@ userSchema.statics.isJwtIssuedBeforePasswordChange = async function (
   return passChangeTime > tokenIssuedTime;
 };
 
-export const User = model<TUser, userModel>('User', userSchema);
+export const User = model<IUser, userModel>('User', userSchema);

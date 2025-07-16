@@ -177,10 +177,7 @@ const changePassword = async (payload: IUser, userPass: TChangePassword) => {
 };
 
 const forgetPassword = async (email: string) => {
-  const isUserExist = await User.findOne({
-    email,
-  });
-
+  const isUserExist = await User.findOne({ email });
   if (!isUserExist) {
     throw new AppError(status.NOT_FOUND, 'user not found');
   }
@@ -208,7 +205,7 @@ const forgetPassword = async (email: string) => {
     config.jwt_expiration as string,
   );
 
-  const resetLink = `${config.reset_pass_ui_link}?id=${email}&token=${resetToken}`;
+  const resetLink = `${config.reset_pass_ui_link}?email=${email}&token=${resetToken}`;
 
   sendMail(isUserExist.email, resetLink);
 };

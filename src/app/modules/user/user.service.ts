@@ -1,9 +1,9 @@
 import status from 'http-status';
 import AppError from '../../errors/AppError';
-import { TUser } from './user.interface';
+import { IUser } from './user.interface';
 import { User } from './user.model';
 
-const createUserIntoDB = async (payload: TUser) => {
+const createUserIntoDB = async (payload: IUser) => {
   const isExists = await User.findOne({ email: payload.email });
   if (isExists) {
     throw new AppError(status.NOT_FOUND, 'User already exists with this email');
@@ -12,7 +12,7 @@ const createUserIntoDB = async (payload: TUser) => {
   return result;
 };
 
-const updateUserIntoDB = async (id: string, payload: Partial<TUser>) => {
+const updateUserIntoDB = async (id: string, payload: Partial<IUser>) => {
   const isExists = await User.findById(id);
   if (!isExists) {
     throw new AppError(status.NOT_FOUND, 'User not found');
