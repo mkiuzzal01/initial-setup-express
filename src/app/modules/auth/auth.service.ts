@@ -74,52 +74,6 @@ const registerUser = async (payload: TUser) => {
   return result;
 };
 
-const changePassword = async (payload: TUser, userPass: TChangePassword) => {
-  const isUserExist = await User.findOne({ email: payload?.email });
-
-  if (!isUserExist) {
-    throw new AppError(status.NOT_FOUND, 'User not found');
-  }
-
-  const isDeleted = isUserExist?.isDeleted;
-  if (isDeleted === true) {
-    throw new AppError(status.FORBIDDEN, 'User is deleted');
-  }
-  const userStatus = isUserExist?.status;
-
-  if (userStatus === 'blocked') {
-    throw new AppError(status.FORBIDDEN, 'User is blocked');
-  }
-
-  //check the provided password is exist:
-  const isPasswordMatch = await User.isPasswordMatch(
-    userPass?.oldPassword,
-    isUserExist?.password,
-  );
-
-  if (!isPasswordMatch) {
-    throw new AppError(status.UNAUTHORIZED, 'Invalid credentials');
-  }
-
-  //encrypted new password:
-  const newHasPassword = await bcrypt.hash(
-    userPass?.newPassword,
-    Number(config.bcrypt_salt_round),
-  );
-
-  await User.findOneAndUpdate(
-    {
-      email: payload?.email,
-    },
-    {
-      password: newHasPassword,
-      passwordChangeAt: new Date(),
-    },
-  );
-
-  return null;
-};
-
 const refreshToken = async (token: string) => {
   if (!token) {
     throw new AppError(status.UNAUTHORIZED, 'you are not authorized');
@@ -174,6 +128,52 @@ const refreshToken = async (token: string) => {
   return {
     accessToken,
   };
+};
+
+const changePassword = async (payload: TUser, userPass: TChangePassword) => {
+  const isUserExist = await User.findOne({ email: payload?.email });
+
+  if (!isUserExist) {
+    throw new AppError(status.NOT_FOUND, 'User not found');
+  }
+
+  const isDeleted = isUserExist?.isDeleted;
+  if (isDeleted === true) {
+    throw new AppError(status.FORBIDDEN, 'User is deleted');
+  }
+  const userStatus = isUserExist?.status;
+
+  if (userStatus === 'blocked') {
+    throw new AppError(status.FORBIDDEN, 'User is blocked');
+  }
+
+  //check the provided password is exist:
+  const isPasswordMatch = await User.isPasswordMatch(
+    userPass?.oldPassword,
+    isUserExist?.password,
+  );
+
+  if (!isPasswordMatch) {
+    throw new AppError(status.UNAUTHORIZED, 'Invalid credentials');
+  }
+
+  //encrypted new password:
+  const newHasPassword = await bcrypt.hash(
+    userPass?.newPassword,
+    Number(config.bcrypt_salt_round),
+  );
+
+  await User.findOneAndUpdate(
+    {
+      email: payload?.email,
+    },
+    {
+      password: newHasPassword,
+      passwordChangeAt: new Date(),
+    },
+  );
+
+  return null;
 };
 
 const forgetPassword = async (email: string) => {

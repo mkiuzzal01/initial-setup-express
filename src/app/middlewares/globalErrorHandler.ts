@@ -7,7 +7,7 @@ import handleValidationError from '../errors/handleValidationError';
 import handleCastError from '../errors/handleCastError';
 import handleDuplicateError from '../errors/handleDuplicateError';
 import AppError from '../errors/AppError';
-import { TErrorSource } from '../interface/Terror';
+import { TErrorSource } from '../interface/TError';
 
 const globalErrorHandler: ErrorRequestHandler = (
   err,
