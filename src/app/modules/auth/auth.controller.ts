@@ -3,15 +3,27 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import status from 'http-status';
 import { AuthService } from './auth.service';
+import config from '../../config';
 
 const login: RequestHandler = catchAsync(async (req, res) => {
   const payload = req.body;
-  const result = await AuthService.loginUser(payload);
+  const { accessToken, refreshToken, needsPasswordChange } =
+    await AuthService.loginUser(payload);
+
+  //set the refresh token in cookies:
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.node_env === 'production',
+    httpOnly: true,
+  });
+
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
     message: 'User logged in successfully',
-    data: result,
+    data: {
+      accessToken,
+      needsPasswordChange,
+    },
   });
 });
 
@@ -26,6 +38,17 @@ const register: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const refreshToken: RequestHandler = catchAsync(async (req, res) => {
+  const token = req.cookies.refreshToken;
+  const result = await AuthService.refreshToken(token);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'Refresh token generated successfully',
+    data: result,
+  });
+});
+
 const changePassword: RequestHandler = catchAsync(async (req, res) => {
   const userPass = req.body;
   const userData = req.user;
@@ -34,17 +57,6 @@ const changePassword: RequestHandler = catchAsync(async (req, res) => {
     statusCode: status.OK,
     success: true,
     message: 'Password update successfully',
-    data: result,
-  });
-});
-
-const refreshToken: RequestHandler = catchAsync(async (req, res) => {
-  const token = req.cookies.refreshToken;
-  const result = await AuthService.refreshToken(token);
-  sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: 'Refresh token generated successfully',
     data: result,
   });
 });
