@@ -24,13 +24,13 @@ const refreshTokenValidationSchema = z.object({
 
 const forgetPasswordValidationSchema = z.object({
   body: z.object({
-    id: z.string({ message: 'id is required' }),
+    email: z.string({ message: 'email is required' }),
   }),
 });
 
 const resetPasswordValidationSchema = z.object({
   body: z.object({
-    id: z.string({ message: 'id is required' }),
+    email: z.string({ message: 'email is required' }),
     newPassword: z.string({
       message: 'user password is required',
     }),

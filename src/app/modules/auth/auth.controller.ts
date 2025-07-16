@@ -4,6 +4,7 @@ import sendResponse from '../../utils/sendResponse';
 import status from 'http-status';
 import { AuthService } from './auth.service';
 import config from '../../config';
+import { IUser } from '../user/user.interface';
 
 const login: RequestHandler = catchAsync(async (req, res) => {
   const payload = req.body;
@@ -51,7 +52,7 @@ const refreshToken: RequestHandler = catchAsync(async (req, res) => {
 
 const changePassword: RequestHandler = catchAsync(async (req, res) => {
   const userPass = req.body;
-  const userData = req.user;
+  const userData = req.user as IUser;
   const result = await AuthService.changePassword(userData, userPass);
   sendResponse(res, {
     statusCode: status.OK,
