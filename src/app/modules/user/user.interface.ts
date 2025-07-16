@@ -24,7 +24,6 @@ export interface TUser {
   gender: TGender;
   password: string;
   image?: string;
-  needsPasswordChange: boolean;
   passwordChangeAt?: Date;
   role: TUserRole;
   status: TUserStatus;

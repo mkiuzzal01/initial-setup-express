@@ -20,7 +20,6 @@ const userSchema = new Schema<TUser, userModel>(
     gender: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
-    needsPasswordChange: { type: Boolean, default: true },
     passwordChangeAt: {
       type: Date,
     },

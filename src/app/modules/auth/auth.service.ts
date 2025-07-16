@@ -113,7 +113,6 @@ const changePassword = async (payload: TUser, userPass: TChangePassword) => {
     },
     {
       password: newHasPassword,
-      needsPasswordChange: false,
       passwordChangeAt: new Date(),
     },
   );
