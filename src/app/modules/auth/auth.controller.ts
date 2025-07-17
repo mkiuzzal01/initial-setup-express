@@ -63,8 +63,8 @@ const changePassword: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const forgetPassword: RequestHandler = catchAsync(async (req, res) => {
-  const payload = req.body;
-  await AuthService.forgetPassword(payload);
+  const email = req.body.email;
+  await AuthService.forgetPassword(email);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
@@ -75,6 +75,7 @@ const forgetPassword: RequestHandler = catchAsync(async (req, res) => {
 const resetPassword: RequestHandler = catchAsync(async (req, res) => {
   const payload = req.body;
   const token = req.params.token;
+
   await AuthService.resetPassword(payload, token);
   sendResponse(res, {
     statusCode: status.OK,

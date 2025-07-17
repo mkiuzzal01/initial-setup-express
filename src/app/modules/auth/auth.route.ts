@@ -31,6 +31,7 @@ route.post(
 );
 route.post(
   '/forget-password',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
   validationRequest(authValidation.forgetPasswordValidationSchema),
   authController.forgetPassword,
 );

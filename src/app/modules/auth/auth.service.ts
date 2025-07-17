@@ -250,7 +250,6 @@ const resetPassword = async (payload: TResetPassword, token: string) => {
     },
     {
       password: newHasPassword,
-      needsPasswordChange: false,
       passwordChangeAt: new Date(),
     },
   );
